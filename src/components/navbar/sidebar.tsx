@@ -36,7 +36,7 @@ const menuItems = [
     {
         name: 'Panel',
         icon: <MdDashboard className="h-6"/>,
-        path: '/dashboard',
+        path: '/',
     },
     {
         name: 'Menú',
