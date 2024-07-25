@@ -1,48 +1,55 @@
-import React from "react";
+'use client'
+
+import React, {ReactNode} from "react";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
-import {useRegisterAccountContext} from "@/lib/context/auth/register-account-context";
-import {z} from "zod";
 import {SubmitHandler, useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
+import {registerBusiness as actionRegisterBusiness} from "@/_request/auth/register";
+import {toast} from "sonner";
+import {useRouter} from "next/navigation";
+import {useMutation} from "@tanstack/react-query";
+import {registerBusiness, RegisterBusinessDto} from "@/app/(auth)/register/business/formValidation";
 
-const RegisterBusinessForm = () => {
-    const formContext = useRegisterAccountContext();
-    const registerBusiness = z.object({
-        businessName: z.string({required_error: 'businessName is required'}).min(1),
-        document: z.string({required_error: 'document is required'}).min(1),
-        address: z.string({required_error: 'address is required'}).min(1),
-        postalCode: z.coerce.number({
-            required_error: 'postalCode is required',
-            invalid_type_error: 'postalCode is required'
-        }).min(4),
-        province: z.string({required_error: 'province is required'}).min(1),
-        town: z.string({required_error: 'town is required'}).min(1),
-        country: z.string({required_error: 'country is required'}).min(1),
-    });
-
-    const businessForm = useForm<z.infer<typeof registerBusiness>>({
+export function RegisterBusinessForm(): ReactNode {
+    const {push} = useRouter();
+    const businessForm = useForm<RegisterBusinessDto>({
         resolver: zodResolver(registerBusiness),
         defaultValues: {
-            businessName: formContext.propertyForm?.businessName,
-            document: formContext.propertyForm?.document,
-            address: formContext.propertyForm?.address,
-            postalCode: formContext.propertyForm?.postalCode,
-            province: formContext.propertyForm?.province,
-            town: formContext.propertyForm?.town,
-            country: formContext.propertyForm?.country,
+            businessName: '',
+            document: '',
+            address: '',
+            postalCode: '',
+            province: '',
+            town: '',
+            country: '',
         }
     });
-    const onSubmit: SubmitHandler<z.infer<typeof registerBusiness>> = (values: z.infer<typeof registerBusiness>) => {
-        formContext.updatePropertyForm(values);
-        formContext.onHandleNext();
+
+    const mutation = useMutation({
+        mutationFn: actionRegisterBusiness,
+        onSuccess: async () => {
+            toast.success('Registrado correctamente');
+            push('/register/local');
+        },
+        onError: (error) => {
+            console.log(error);
+            toast.error('Error al registrar');
+        }
+    });
+    const onSubmit: SubmitHandler<RegisterBusinessDto> = async (values: RegisterBusinessDto) => {
+        try {
+            mutation.mutate(values);
+        } catch (e) {
+            toast.error('Ha ocurrido un error al registrar el usuario');
+        }
     }
 
     return (
         <div className={"space-y-4"}>
             <Form {...businessForm} >
-                <form className={"space-y-3"}>
+                <form className={"space-y-3"} onSubmit={businessForm.handleSubmit(onSubmit)}>
                     <div className={"flex flex-col xl:flex-row gap-3"}>
                         <FormField
                             name={"businessName"}
@@ -50,10 +57,10 @@ const RegisterBusinessForm = () => {
                             render={({field}) => (
                                 <FormItem className={"w-full xl:w-1/2"}>
                                     <FormLabel>
-                                        Nombre empresa
+                                        Nombre
                                     </FormLabel>
                                     <FormControl>
-                                        <Input placeholder={"Razón social"} {...field}/>
+                                        <Input placeholder={"Mercadona, Primark, CocaCola..."} {...field}/>
                                     </FormControl>
                                     <FormMessage/>
                                 </FormItem>
@@ -68,7 +75,7 @@ const RegisterBusinessForm = () => {
                                         NIF
                                     </FormLabel>
                                     <FormControl>
-                                        <Input placeholder={"DNI/NIF"} {...field}/>
+                                        <Input placeholder={"01234567A"} {...field}/>
                                     </FormControl>
                                     <FormMessage/>
                                 </FormItem>
@@ -102,7 +109,7 @@ const RegisterBusinessForm = () => {
                                         Código postal
                                     </FormLabel>
                                     <FormControl>
-                                        <Input type={"number"} placeholder={"Código postal"} {...field}/>
+                                        <Input type={"number"} placeholder={"012345"} {...field}/>
                                     </FormControl>
                                     <FormMessage/>
                                 </FormItem>
@@ -120,7 +127,7 @@ const RegisterBusinessForm = () => {
                                         Provincia
                                     </FormLabel>
                                     <FormControl>
-                                        <Input placeholder={"Provincia"} {...field}/>
+                                        <Input placeholder={"Murcia"} {...field}/>
                                     </FormControl>
                                     <FormMessage/>
                                 </FormItem>
@@ -136,7 +143,7 @@ const RegisterBusinessForm = () => {
                                         Localidad
                                     </FormLabel>
                                     <FormControl>
-                                        <Input placeholder={"Localidad"} {...field}/>
+                                        <Input placeholder={"Murcia"} {...field}/>
                                     </FormControl>
                                     <FormMessage/>
                                 </FormItem>
@@ -152,7 +159,7 @@ const RegisterBusinessForm = () => {
                                         País
                                     </FormLabel>
                                     <FormControl>
-                                        <Input placeholder={"País"} {...field}/>
+                                        <Input placeholder={"España"} {...field}/>
                                     </FormControl>
                                     <FormMessage/>
                                 </FormItem>
@@ -160,10 +167,10 @@ const RegisterBusinessForm = () => {
                         >
                         </FormField>
                     </div>
+                    <Button type={"submit"}>Guardar</Button>
                 </form>
             </Form>
             <div className='w-full flex justify-center gap-8'>
-                <Button type={"button"} onClick={businessForm.handleSubmit(onSubmit)}>Siguiente</Button>
             </div>
         </div>
     );

@@ -13,21 +13,28 @@ import {useState} from "react";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Sheet, SheetTrigger} from "@/components/ui/sheet";
-import {CreateProductSheet} from "@/components/products/create-product-sheet";
 import {TableSkeletonColumns} from "@/components/ui/table-skeleton-columns";
+import Link from "next/link";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
     isLoading: boolean;
+    entityName: string;
+    searchBy: string;
 }
 
-export function ProductTable<TData, TValue>({columns, data: products, isLoading}: DataTableProps<TData, TValue>) {
+export function ProductTable<TData, TValue>({
+                                                columns,
+                                                data,
+                                                isLoading,
+                                                entityName,
+                                                searchBy
+                                            }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const table = useReactTable({
-        data: products,
+        data,
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
@@ -41,27 +48,24 @@ export function ProductTable<TData, TValue>({columns, data: products, isLoading}
         }
     });
 
-    const [sheetOpen, setSheetOpen] = useState<boolean>(false);
-
     return (
-        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-            <div className="flex gap-1 items-center py-4 join">
+        <>
+            <div className="flex gap-1 items-center py-4">
                 <Input
                     className={"w-1/3"}
                     type={"text"}
                     name={"filter"}
-                    placeholder="Nombre producto..."
-                    value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+                    placeholder={`Nombre ${entityName}...`}
+                    value={(table.getColumn(searchBy)?.getFilterValue() as string) ?? ""}
                     onChange={(event) =>
-                        table.getColumn("name")?.setFilterValue(event.target.value)
+                        table.getColumn(searchBy)?.setFilterValue(event.target.value)
                     }
                 />
-                <SheetTrigger asChild>
-                    <Button>
-                        Crear producto
-                    </Button>
-                </SheetTrigger>
-                <CreateProductSheet setSheetOpen={setSheetOpen}/>
+                <Button asChild>
+                    <Link href={'/dashboard/products/create'}>
+                        Crear {entityName}
+                    </Link>
+                </Button>
             </div>
             <div className={"rounded-md border"}>
                 <Table>
@@ -85,7 +89,7 @@ export function ProductTable<TData, TValue>({columns, data: products, isLoading}
                     </TableHeader>
                     <TableBody>
                         {
-                            products &&
+                            data &&
                             (
                                 table.getRowModel().rows.map((row) => (
                                     <TableRow
@@ -108,7 +112,7 @@ export function ProductTable<TData, TValue>({columns, data: products, isLoading}
                             )
                         }
                         {
-                            (!isLoading && products?.length === 0) &&
+                            (!isLoading && data?.length === 0) &&
                             (
                                 <TableRow>
                                     <TableCell colSpan={columns.length} className="h-24 text-center">
@@ -120,20 +124,22 @@ export function ProductTable<TData, TValue>({columns, data: products, isLoading}
                     </TableBody>
                 </Table>
             </div>
-            <div className={"w-full flex justify-end mt-4"}>
-                <div className={"join"}>
-                    <Button
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
-                    >Atrás
-                    </Button>
-                    <Button
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                    >Siguiente
-                    </Button>
+            {
+                false ?? <div className={"w-full flex justify-end mt-4"}>
+                    <div className={"space-x-2"}>
+                        <Button
+                            onClick={() => table.previousPage()}
+                            disabled={!table.getCanPreviousPage()}
+                        >Atrás
+                        </Button>
+                        <Button
+                            onClick={() => table.nextPage()}
+                            disabled={!table.getCanNextPage()}
+                        >Siguiente
+                        </Button>
+                    </div>
                 </div>
-            </div>
-        </Sheet>
+            }
+        </>
     )
 }
