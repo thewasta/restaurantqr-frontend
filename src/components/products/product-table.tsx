@@ -13,8 +13,6 @@ import {useState} from "react";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Sheet, SheetTrigger} from "@/components/ui/sheet";
-import {CreateProductSheet} from "@/components/products/create-product-sheet";
 import {TableSkeletonColumns} from "@/components/ui/table-skeleton-columns";
 import Link from "next/link";
 
@@ -119,7 +117,7 @@ export function ProductTable<TData, TValue>({columns, data: products, isLoading}
                 </Table>
             </div>
             <div className={"w-full flex justify-end mt-4"}>
-                <div className={"join"}>
+                <div className={"space-x-2"}>
                     <Button
                         onClick={() => table.previousPage()}
                         disabled={!table.getCanPreviousPage()}

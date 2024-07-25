@@ -16,22 +16,23 @@ import {ChangeEvent} from "react";
 import {Switch} from "@/components/ui/switch";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {cn} from "@/lib/utils";
+import {CategoryItemInput} from "@/components/form/categoryItemInput";
 
 interface IEditProductForm<T> {
     product: Product | null,
     submitHandler: (values: T) => void,
-    isEdit: boolean,
-    categories: any
+    categories: any[]
 }
 
-export default function ProductForm<T>({product, submitHandler, isEdit, categories}: IEditProductForm<T>) {
+export default function ProductForm<T>({product, submitHandler, categories}: IEditProductForm<T>) {
 
     const form = useForm<CreateProductDTO>({
         resolver: zodResolver(createProductSchema),
         defaultValues: {
             name: product?.name,
             description: product?.description,
-            images: undefined,
+            //@todo Debe ser plural
+            image: undefined,
             price: product?.price,
             category: product?.category,
             subCategory: product?.subCategory ?? undefined,
@@ -46,10 +47,11 @@ export default function ProductForm<T>({product, submitHandler, isEdit, categori
         <div>
             <section className={'flex justify-end mb-3'}>
                 {
-                    isEdit ?
+                    product ?
                         (
                             <Button>
-                                <SaveIcon className={'mr-3'}/>
+                                {/*@ts-ignore*/}
+                                <SaveIcon className={'mr-3'} onClick={form.handleSubmit(submitHandler)}/>
                                 Guardar Cambios
                             </Button>
                         ) :
@@ -71,6 +73,7 @@ export default function ProductForm<T>({product, submitHandler, isEdit, categori
                 {/*@ts-ignore*/}
                 <form onSubmit={form.handleSubmit(submitHandler)} encType={"multipart/form-data"}
                       className={"space-y-5"}>
+                    <Input readOnly className={'hidden'} name={'businessUid'} value={'papapapappapa'}/>
                     <FormField
                         name={'highlight'}
                         control={form.control}
@@ -272,12 +275,12 @@ export default function ProductForm<T>({product, submitHandler, isEdit, categori
                                         <SelectContent>
                                             <SelectGroup>
                                                 <SelectItem value={"0"}>Seleccionar categoría</SelectItem>
-                                                {/*{*/}
-                                                {/*    categories &&*/}
-                                                {/*    categories.map((category, index) => (*/}
-                                                {/*        <CategoryItemInput {...category} key={index}/>*/}
-                                                {/*    ))*/}
-                                                {/*}*/}
+                                                {
+                                                    categories &&
+                                                    categories.map((category, index) => (
+                                                        <CategoryItemInput {...category} key={index}/>
+                                                    ))
+                                                }
                                             </SelectGroup>
                                         </SelectContent>
                                     </Select>
@@ -305,12 +308,12 @@ export default function ProductForm<T>({product, submitHandler, isEdit, categori
                                         <SelectContent>
                                             <SelectGroup>
                                                 <SelectItem value={"0"}>Seleccionar categoría</SelectItem>
-                                                {/*{*/}
-                                                {/*    categories &&*/}
-                                                {/*    categories.map((category, index) => (*/}
-                                                {/*        <CategoryItemInput {...category} key={index}/>*/}
-                                                {/*    ))*/}
-                                                {/*}*/}
+                                                {
+                                                    categories &&
+                                                    categories.map((category, index) => (
+                                                        <CategoryItemInput {...category} key={index}/>
+                                                    ))
+                                                }
                                             </SelectGroup>
                                         </SelectContent>
                                     </Select>
@@ -338,7 +341,7 @@ export default function ProductForm<T>({product, submitHandler, isEdit, categori
                         )}
                     />
                     <FormField
-                        name={"images"}
+                        name={"image"}
                         render={({field: {ref, name, onChange, onBlur}}) => (
                             <FormItem>
                                 <FormLabel>
@@ -364,6 +367,10 @@ export default function ProductForm<T>({product, submitHandler, isEdit, categori
                     />
                 </form>
             </Form>
+            {
+                JSON.stringify(form.formState.errors,null,2)
+
+            }
         </div>
     );
 }

@@ -16,8 +16,12 @@ export default function ProductsPage() {
     const {data, error, isLoading} = useQuery<{ error: boolean, message: Product[] }>({
         queryKey: ["products"],
         queryFn: async () => productRetriever(),
-        refetchInterval: 120 * 1000, // Every minutes
-        retry: false
+        retry: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        staleTime: Infinity,
+        refetchOnMount: false,
+        refetchIntervalInBackground: false
     });
 
     useEffect(() => {
@@ -48,7 +52,8 @@ export default function ProductsPage() {
     const columns = useMemo(() => getProductColumns({onDelete}), [])
     return (
         <div className={"col-span-3"}>
-            <ProductTable data={data?.message || []} columns={columns} isLoading={isLoading}/>
+            {/*@ts-ignore*/}
+            <ProductTable data={data?.message.response || []} columns={columns} isLoading={isLoading}/>
         </div>
     );
 }
