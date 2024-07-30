@@ -26,7 +26,8 @@ const exampleProducts: Product[] = [
         offerPrice: 0,
         publishDate: null,
         status: 'ACTIVE',
-        subCategory: ''
+        subCategory: '',
+        ingredients: ''
     }
 ]
 export default function HomeDashboard() {
